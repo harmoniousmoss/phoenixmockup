@@ -7,3 +7,4 @@
 * [ ] Stack endpoint
 * [ ] Signup endpoint
 * [ ] Signin endpoint
+* [ ] User endpoint

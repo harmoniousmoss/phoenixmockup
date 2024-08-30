@@ -1,4 +1,4 @@
-## Simply Company Website Using Phoenix Framework
+## Full-stack Web Development Using Phoenix Framework
 
 ## Development in plan
 * [ ] Contact endpoint

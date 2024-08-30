@@ -1,7 +1,7 @@
-# Simply Company Website Using Phoenix Framework
+## Simply Company Website Using Phoenix Framework
 
 # Development in plan
-[ ] Contact endpoint
-[ ] News endpoint
-[ ] Portfolio endpoint
-[ ] Stack endpoint
+* [x] Contact endpoint
+* [ ] News endpoint
+* [ ] Portfolio endpoint
+* [ ] Stack endpoint

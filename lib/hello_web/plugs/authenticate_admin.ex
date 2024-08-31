@@ -10,11 +10,13 @@ defmodule HelloWeb.Plugs.AuthenticateAdmin do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
          {:ok, user_id} <-
            Phoenix.Token.verify(HelloWeb.Endpoint, "user_auth", token, max_age: 86400),
-         # Ensure that user_id is a valid UUID
          {:ok, uuid} <- Ecto.UUID.cast(user_id),
-         %User{role: "administrator"} = _user <- Repo.get(User, uuid) do
+         %User{} = user <- Repo.get(User, uuid) do
       Logger.debug("Authenticated user ID: #{user_id}, UUID: #{uuid}")
+
+      # Assign the user to the connection for later use
       conn
+      |> assign(:current_user, user)
     else
       error ->
         Logger.error("Authentication failed: #{inspect(error)}")

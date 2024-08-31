@@ -18,7 +18,6 @@ defmodule HelloWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    post "/contacts", ContactController, :create
     post "/users/signup", UserController, :create
     post "/users/signin", UserController, :signin
     post "/users/:id/approve", UserController, :approve_user
@@ -29,6 +28,9 @@ defmodule HelloWeb.Router do
     get "/news/:id", NewsController, :show
     put "/news/:id", NewsController, :update
     delete "/news/:id", NewsController, :delete
+    get "/contacts", ContactController, :index
+    get "/contacts/:id", ContactController, :show
+    post "/contacts", ContactController, :create
   end
 
   # Other scopes may use custom stacks.

@@ -14,7 +14,6 @@ defmodule HelloWeb.UserController do
 
     case Repo.insert(changeset) do
       {:ok, _user} ->
-        # Generate token or any other necessary actions after user creation
         conn
         |> put_flash(:info, "User created successfully.")
         |> redirect(to: "/")
@@ -45,5 +44,38 @@ defmodule HelloWeb.UserController do
           |> json(%{error: "Invalid email or password, or user not approved."})
         end
     end
+  end
+
+  plug HelloWeb.Plugs.AuthenticateAdmin when action in [:approve_user]
+
+  def approve_user(conn, %{"id" => id}) do
+    user = Repo.get!(User, id)
+
+    changeset =
+      user
+      |> Ecto.Changeset.change(status: "approved")
+      |> Ecto.Changeset.validate_inclusion(:status, ["pending", "approved"])
+
+    case Repo.update(changeset) do
+      {:ok, _user} ->
+        conn
+        |> put_flash(:info, "User approved successfully.")
+        |> json(%{message: "User approved successfully."})
+
+      {:error, changeset} ->
+        IO.inspect(changeset.errors, label: "Changeset errors")
+
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Unable to approve user.", details: format_errors(changeset)})
+    end
+  end
+
+  defp format_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
   end
 end

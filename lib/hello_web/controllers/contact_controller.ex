@@ -1,10 +1,26 @@
-# lib/hello_web/controllers/contact_controller.ex
 defmodule HelloWeb.ContactController do
   use HelloWeb, :controller
   alias Hello.Contact
   alias Hello.Repo
 
-  def create(conn, %{"contact" => contact_params}) do
+  def create(conn, %{
+        "full_name" => full_name,
+        "email" => email,
+        "phone_number" => phone_number,
+        "message" => message,
+        "terms_and_conditions" => terms_and_conditions
+      }) do
+    # Convert "terms_and_conditions" to a boolean
+    terms_and_conditions = terms_and_conditions == "true"
+
+    contact_params = %{
+      "full_name" => full_name,
+      "email" => email,
+      "phone_number" => phone_number,
+      "message" => message,
+      "terms_and_conditions" => terms_and_conditions
+    }
+
     changeset = Contact.changeset(%Contact{}, contact_params)
 
     case Repo.insert(changeset) do

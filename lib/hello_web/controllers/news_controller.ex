@@ -66,4 +66,12 @@ defmodule HelloWeb.NewsController do
 
     "https://#{bucket}.s3.#{System.get_env("AWS_REGION")}.amazonaws.com/#{s3_key}"
   end
+
+  def index(conn, _params) do
+    news = Repo.all(News)
+
+    conn
+    |> put_status(:ok)
+    |> json(news)
+  end
 end

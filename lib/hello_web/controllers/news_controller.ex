@@ -74,4 +74,12 @@ defmodule HelloWeb.NewsController do
     |> put_status(:ok)
     |> json(news)
   end
+
+  def show(conn, %{"id" => id}) do
+    news = Repo.get!(News, id)
+
+    conn
+    |> put_status(:ok)
+    |> json(news)
+  end
 end

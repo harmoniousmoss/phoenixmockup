@@ -46,7 +46,7 @@ defmodule HelloWeb.UserController do
     end
   end
 
-  plug HelloWeb.Plugs.AuthenticateAdmin when action in [:approve_user]
+  plug HelloWeb.Plugs.AuthenticateAdmin when action in [:approve_user, :index]
 
   def approve_user(conn, %{"id" => id}) do
     user = Repo.get!(User, id)
@@ -77,5 +77,13 @@ defmodule HelloWeb.UserController do
         String.replace(acc, "%{#{key}}", to_string(value))
       end)
     end)
+  end
+
+  def index(conn, _params) do
+    users = Repo.all(User)
+
+    conn
+    |> put_status(:ok)
+    |> json(users)
   end
 end

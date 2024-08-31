@@ -3,6 +3,11 @@ defmodule HelloWeb.ContactController do
   alias Hello.Contact
   alias Hello.Repo
 
+  plug HelloWeb.Plugs.AuthenticateUser when action in [:index, :show]
+
+  # Ensure only approved users can access the index and show actions
+  plug :ensure_approved_user when action in [:index, :show]
+
   def create(conn, %{
         "full_name" => full_name,
         "email" => email,
@@ -33,6 +38,41 @@ defmodule HelloWeb.ContactController do
         conn
         |> put_flash(:error, "There was an error submitting the form.")
         |> render("new.html", changeset: changeset)
+    end
+  end
+
+  def index(conn, _params) do
+    contacts = Repo.all(Contact)
+
+    conn
+    |> put_status(:ok)
+    |> json(contacts)
+  end
+
+  def show(conn, %{"id" => id}) do
+    case Repo.get(Contact, id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Contact not found"})
+
+      contact ->
+        conn
+        |> put_status(:ok)
+        |> json(contact)
+    end
+  end
+
+  defp ensure_approved_user(conn, _opts) do
+    user = conn.assigns.current_user
+
+    if user && user.status == "approved" do
+      conn
+    else
+      conn
+      |> put_status(:forbidden)
+      |> json(%{error: "You are not authorized to access this resource."})
+      |> halt()
     end
   end
 end

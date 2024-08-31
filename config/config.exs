@@ -60,9 +60,7 @@ config :ex_aws, :s3,
   region: {:system, "AWS_REGION"},
   access_key_id: {:system, "AWS_ACCESS_KEY_ID"},
   secret_access_key: {:system, "AWS_SECRET_ACCESS_KEY"},
-  scheme: "https://",
-  host: "s3.ap-southeast-1.amazonaws.com",
-  bucket_url: "https://prosperadevbucket.s3.ap-southeast-1.amazonaws.com"
+  scheme: "https://"
 
 # Import environment-specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

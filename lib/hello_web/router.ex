@@ -20,6 +20,7 @@ defmodule HelloWeb.Router do
     get "/", PageController, :home
     post "/contacts", ContactController, :create
     post "/users/signup", UserController, :create
+    post "/users/signin", UserController, :signin
   end
 
   # Other scopes may use custom stacks.

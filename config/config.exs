@@ -56,17 +56,14 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :ex_aws, :s3,
+  region: {:system, "AWS_REGION"},
+  access_key_id: {:system, "AWS_ACCESS_KEY_ID"},
+  secret_access_key: {:system, "AWS_SECRET_ACCESS_KEY"},
+  scheme: "https://",
+  host: "s3.ap-southeast-1.amazonaws.com",
+  bucket_url: "https://prosperadevbucket.s3.ap-southeast-1.amazonaws.com"
+
 # Import environment-specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
-
-config :ex_aws,
-  access_key_id: {:system, "AWS_ACCESS_KEY_ID"},
-  secret_access_key: {:system, "AWS_SECRET_ACCESS_KEY"},
-  region: {:system, "AWS_REGION"}
-
-config :ex_aws, :s3,
-  region: {:system, "AWS_REGION"},
-  scheme: "https://",
-  host: "s3.amazonaws.com",
-  bucket: {:system, "AWS_BUCKET_NAME"}

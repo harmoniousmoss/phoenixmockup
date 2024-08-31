@@ -1,8 +1,10 @@
 # lib/hello/contact.ex
+
 defmodule Hello.Contact do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :binary_id, autogenerate: true}
   schema "contacts" do
     field :full_name, :string
     field :email, :string

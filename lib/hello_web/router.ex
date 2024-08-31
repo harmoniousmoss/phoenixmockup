@@ -31,6 +31,7 @@ defmodule HelloWeb.Router do
     get "/contacts", ContactController, :index
     get "/contacts/:id", ContactController, :show
     post "/contacts", ContactController, :create
+    delete "/contacts/:id", ContactController, :delete
   end
 
   # Other scopes may use custom stacks.

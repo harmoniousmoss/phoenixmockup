@@ -46,7 +46,7 @@ defmodule HelloWeb.UserController do
     end
   end
 
-  plug HelloWeb.Plugs.AuthenticateAdmin when action in [:approve_user, :index]
+  plug HelloWeb.Plugs.AuthenticateAdmin when action in [:approve_user, :index, :show]
 
   def approve_user(conn, %{"id" => id}) do
     user = Repo.get!(User, id)
@@ -85,5 +85,38 @@ defmodule HelloWeb.UserController do
     conn
     |> put_status(:ok)
     |> json(users)
+  end
+
+  def show(conn, %{"id" => id}) do
+    user = Repo.get!(User, id)
+
+    # Restrict access based on user role
+    current_user_id = conn.assigns.current_user.id
+    current_user_role = conn.assigns.current_user.role
+
+    case current_user_role do
+      "administrator" ->
+        render_user(conn, user)
+
+      "editor" ->
+        if current_user_id == user.id do
+          render_user(conn, user)
+        else
+          conn
+          |> put_status(:forbidden)
+          |> json(%{error: "You are not authorized to access this resource."})
+        end
+
+      _ ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not authorized to access this resource."})
+    end
+  end
+
+  defp render_user(conn, user) do
+    conn
+    |> put_status(:ok)
+    |> json(user)
   end
 end

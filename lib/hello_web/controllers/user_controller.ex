@@ -18,4 +18,25 @@ defmodule HelloWeb.UserController do
         |> render("new.html", changeset: changeset)
     end
   end
+
+  def signin(conn, %{"email" => email, "password" => password}) do
+    case Repo.get_by(User, email: email) do
+      nil ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: "Invalid email or password."})
+
+      user ->
+        if user.status == "approved" && Bcrypt.verify_pass(password, user.password_hash) do
+          token = Phoenix.Token.sign(HelloWeb.Endpoint, "user_auth", user.id)
+
+          conn
+          |> json(%{token: token, message: "Sign-in successful."})
+        else
+          conn
+          |> put_status(:unauthorized)
+          |> json(%{error: "Invalid email or password, or user not approved."})
+        end
+    end
+  end
 end

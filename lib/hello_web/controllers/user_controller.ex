@@ -3,11 +3,18 @@ defmodule HelloWeb.UserController do
   alias Hello.User
   alias Hello.Repo
 
-  def create(conn, %{"user" => user_params}) do
+  def create(conn, %{"full_name" => full_name, "email" => email, "password" => password}) do
+    user_params = %{
+      "full_name" => full_name,
+      "email" => email,
+      "password" => password
+    }
+
     changeset = User.changeset(%User{}, user_params)
 
     case Repo.insert(changeset) do
       {:ok, _user} ->
+        # Generate token or any other necessary actions after user creation
         conn
         |> put_flash(:info, "User created successfully.")
         |> redirect(to: "/")

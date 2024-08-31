@@ -28,6 +28,7 @@ defmodule HelloWeb.Router do
     get "/news", NewsController, :index
     get "/news/:id", NewsController, :show
     put "/news/:id", NewsController, :update
+    delete "/news/:id", NewsController, :delete
   end
 
   # Other scopes may use custom stacks.

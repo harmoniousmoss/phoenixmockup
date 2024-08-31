@@ -6,6 +6,9 @@ defmodule Hello.User do
   @status_values ["pending", "approved"]
   @role_values ["editor", "administrator"]
 
+  # Set the primary key to be a binary_id (UUID)
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @derive {Phoenix.Param, key: :id}
   schema "users" do
     field :full_name, :string
     field :email, :string

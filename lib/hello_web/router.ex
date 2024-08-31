@@ -23,6 +23,7 @@ defmodule HelloWeb.Router do
     post "/users/signin", UserController, :signin
     post "/users/:id/approve", UserController, :approve_user
     get "/users", UserController, :index
+    get "/users/:id", UserController, :show
   end
 
   # Other scopes may use custom stacks.

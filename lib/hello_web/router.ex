@@ -27,6 +27,7 @@ defmodule HelloWeb.Router do
     post "/news", NewsController, :create
     get "/news", NewsController, :index
     get "/news/:id", NewsController, :show
+    put "/news/:id", NewsController, :update
   end
 
   # Other scopes may use custom stacks.

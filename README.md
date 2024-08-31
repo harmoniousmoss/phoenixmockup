@@ -1,11 +1,11 @@
-## Full-stack Web Development Using Phoenix Framework
+## Full-stack Web Development With Phoenix Framework
 
 Please note that this full-stack web development project repository is only concerned with the backend development of the project. The frontend development of the project is done in a separate private repository.
 
 ## Technologies
-* Elixir
-* Phoenix Framework
-* PostgreSQL
+* [`Elixir`](https://elixir-lang.org/)
+* [`Phoenix Framework`](https://www.phoenixframework.org/)
+* [`PostgreSQL`](https://www.postgresql.org/)
 
 ## Development in plan
 ### Backend

@@ -46,7 +46,7 @@ defmodule HelloWeb.UserController do
     end
   end
 
-  plug HelloWeb.Plugs.AuthenticateAdmin when action in [:approve_user, :index, :show]
+  plug HelloWeb.Plugs.AuthenticateUser when action in [:approve_user, :index, :show]
 
   def approve_user(conn, %{"id" => id}) do
     user = Repo.get!(User, id)

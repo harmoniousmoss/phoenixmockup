@@ -3,7 +3,7 @@ defmodule HelloWeb.ContactController do
   alias Hello.Contact
   alias Hello.Repo
 
-  plug HelloWeb.Plugs.AuthenticateUser when action in [:index, :show]
+  plug HelloWeb.Plugs.AuthenticateUser when action in [:index, :show, :delete]
 
   # Ensure only approved users can access the index and show actions
   plug :ensure_approved_user when action in [:index, :show]
@@ -73,6 +73,38 @@ defmodule HelloWeb.ContactController do
       |> put_status(:forbidden)
       |> json(%{error: "You are not authorized to access this resource."})
       |> halt()
+    end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+    contact = Repo.get!(Contact, id)
+
+    case user.role do
+      "administrator" ->
+        delete_contact(conn, contact)
+
+      "editor" ->
+        delete_contact(conn, contact)
+
+      _ ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not authorized to delete this contact."})
+    end
+  end
+
+  defp delete_contact(conn, contact) do
+    case Repo.delete(contact) do
+      {:ok, _deleted_contact} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{message: "Contact deleted successfully."})
+
+      {:error, _changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "Unable to delete the contact."})
     end
   end
 end

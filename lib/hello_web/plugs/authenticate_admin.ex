@@ -1,4 +1,5 @@
-defmodule HelloWeb.Plugs.AuthenticateAdmin do
+# lib/hello_web/plugs/authenticate_user.ex
+defmodule HelloWeb.Plugs.AuthenticateUser do
   import Plug.Conn
   alias Hello.Repo
   alias Hello.User

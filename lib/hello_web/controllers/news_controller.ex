@@ -11,12 +11,6 @@ defmodule HelloWeb.NewsController do
         "news_content" => news_content,
         "news_cover" => %Plug.Upload{} = upload
       }) do
-    # Debug statements to check environment variables
-    IO.inspect(System.get_env("AWS_ACCESS_KEY_ID"), label: "AWS_ACCESS_KEY_ID")
-    IO.inspect(System.get_env("AWS_SECRET_ACCESS_KEY"), label: "AWS_SECRET_ACCESS_KEY")
-    IO.inspect(System.get_env("AWS_REGION"), label: "AWS_REGION")
-    IO.inspect(System.get_env("AWS_BUCKET_NAME"), label: "AWS_BUCKET_NAME")
-
     user = conn.assigns.current_user
 
     # Upload the file to S3 and get the URL
@@ -34,10 +28,23 @@ defmodule HelloWeb.NewsController do
 
     case Repo.insert(changeset) do
       {:ok, news} ->
+        # Construct the response with the author's full name
+        response = %{
+          id: news.id,
+          news_title: news.news_title,
+          news_content: news.news_content,
+          news_status: news.news_status,
+          news_cover: news.news_cover,
+          news_author_id: user.id,
+          # Include the author's full name
+          news_author_full_name: user.full_name,
+          inserted_at: news.inserted_at,
+          updated_at: news.updated_at
+        }
+
         conn
         |> put_status(:created)
-        # Return the full news object
-        |> json(news)
+        |> json(response)
 
       {:error, changeset} ->
         IO.inspect(changeset.errors, label: "Changeset errors")
@@ -58,28 +65,58 @@ defmodule HelloWeb.NewsController do
 
   defp upload_to_s3(%Plug.Upload{path: path, filename: filename}) do
     bucket = System.get_env("AWS_BUCKET_NAME")
+    region = System.get_env("AWS_REGION")
     s3_key = "uploads/news_covers/#{filename}"
 
     {:ok, _} =
       S3.put_object(bucket, s3_key, File.read!(path))
       |> ExAws.request()
 
-    "https://#{bucket}.s3.#{System.get_env("AWS_REGION")}.amazonaws.com/#{s3_key}"
+    "https://#{bucket}.s3.#{region}.amazonaws.com/#{s3_key}"
   end
 
   def index(conn, _params) do
-    news = Repo.all(News)
+    news_list = Repo.all(News) |> Repo.preload(:news_author)
+
+    response =
+      Enum.map(news_list, fn news ->
+        %{
+          id: news.id,
+          news_title: news.news_title,
+          news_content: news.news_content,
+          news_status: news.news_status,
+          news_cover: news.news_cover,
+          news_author_id: news.news_author_id,
+          # Include the author's full name
+          news_author_full_name: news.news_author.full_name,
+          inserted_at: news.inserted_at,
+          updated_at: news.updated_at
+        }
+      end)
 
     conn
     |> put_status(:ok)
-    |> json(news)
+    |> json(response)
   end
 
   def show(conn, %{"id" => id}) do
-    news = Repo.get!(News, id)
+    news = Repo.get!(News, id) |> Repo.preload(:news_author)
+
+    response = %{
+      id: news.id,
+      news_title: news.news_title,
+      news_content: news.news_content,
+      news_status: news.news_status,
+      news_cover: news.news_cover,
+      news_author_id: news.news_author_id,
+      # Include the author's full name
+      news_author_full_name: news.news_author.full_name,
+      inserted_at: news.inserted_at,
+      updated_at: news.updated_at
+    }
 
     conn
     |> put_status(:ok)
-    |> json(news)
+    |> json(response)
   end
 end

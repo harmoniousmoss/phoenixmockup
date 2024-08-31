@@ -4,7 +4,7 @@ defmodule HelloWeb.NewsController do
   alias Hello.Repo
   alias ExAws.S3
 
-  plug HelloWeb.Plugs.AuthenticateUser when action in [:create, :update]
+  plug HelloWeb.Plugs.AuthenticateUser when action in [:create, :update, :delete]
 
   def create(conn, %{
         "news_title" => news_title,
@@ -186,5 +186,44 @@ defmodule HelloWeb.NewsController do
         |> put_status(:unprocessable_entity)
         |> json(%{errors: format_errors(changeset)})
     end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+    news = Repo.get!(News, id) |> Repo.preload(:news_author)
+
+    case user.role do
+      "administrator" ->
+        delete_news(conn, news)
+
+      "editor" ->
+        if news.news_author_id == user.id do
+          delete_news(conn, news)
+        else
+          conn
+          |> put_status(:forbidden)
+          |> json(%{error: "You are not authorized to delete this news."})
+        end
+
+      _ ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not authorized to delete this news."})
+    end
+  end
+
+  defp delete_news(conn, news) do
+    Repo.delete!(news)
+
+    response = %{
+      message: "News successfully deleted.",
+      deleted_news_id: news.id,
+      deleted_news_title: news.news_title,
+      deleted_by: conn.assigns.current_user.full_name
+    }
+
+    conn
+    |> put_status(:ok)
+    |> json(response)
   end
 end

@@ -4,7 +4,7 @@ defmodule HelloWeb.NewsController do
   alias Hello.Repo
   alias ExAws.S3
 
-  plug HelloWeb.Plugs.AuthenticateUser when action in [:create]
+  plug HelloWeb.Plugs.AuthenticateUser when action in [:create, :update]
 
   def create(conn, %{
         "news_title" => news_title,
@@ -118,5 +118,73 @@ defmodule HelloWeb.NewsController do
     conn
     |> put_status(:ok)
     |> json(response)
+  end
+
+  def update(conn, %{"id" => id} = params) do
+    user = conn.assigns.current_user
+    news = Repo.get!(News, id) |> Repo.preload(:news_author)
+
+    case user.role do
+      "administrator" ->
+        update_news(conn, news, params, user)
+
+      "editor" ->
+        if news.news_author_id == user.id do
+          update_news(conn, news, params, user)
+        else
+          conn
+          |> put_status(:forbidden)
+          |> json(%{error: "You are not authorized to edit this news."})
+        end
+
+      _ ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not authorized to edit this news."})
+    end
+  end
+
+  defp update_news(
+         conn,
+         news,
+         params,
+         _user
+       ) do
+    changeset =
+      news
+      |> News.changeset(%{
+        "news_title" => Map.get(params, "news_title", news.news_title),
+        "news_content" => Map.get(params, "news_content", news.news_content),
+        "news_status" => Map.get(params, "news_status", news.news_status),
+        "news_cover" => Map.get(params, "news_cover", news.news_cover)
+      })
+
+    case Repo.update(changeset) do
+      {:ok, updated_news} ->
+        updated_news = Repo.preload(updated_news, :news_author)
+
+        response = %{
+          id: updated_news.id,
+          news_title: updated_news.news_title,
+          news_content: updated_news.news_content,
+          news_status: updated_news.news_status,
+          news_cover: updated_news.news_cover,
+          news_author_id: updated_news.news_author_id,
+          news_author_full_name: updated_news.news_author.full_name,
+          inserted_at: updated_news.inserted_at,
+          updated_at: updated_news.updated_at
+        }
+
+        conn
+        |> put_status(:ok)
+        |> json(response)
+
+      {:error, changeset} ->
+        IO.inspect(changeset.errors, label: "Changeset errors")
+
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{errors: format_errors(changeset)})
+    end
   end
 end
